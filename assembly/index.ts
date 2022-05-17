@@ -28,20 +28,19 @@ export class DocCons{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
   // method list messages for the doctor  
+  showMessages(): Array<ConsultationModule> {
+      let mess= new Array<ConsultationModule>(this.messageLists.length);
+      for(let i = 0 ; i < this.messageLists.length ; i++){
+        mess[i]= this.messageLists[i];
+       }
+       
+       return mess ; 
+    }
+
+
+
+
   
   // method list Doctors by department ID
 
