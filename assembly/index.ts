@@ -1,4 +1,4 @@
-import { Context, PersistentVector } from "near-sdk-as";
+import { Context, PersistentVector , PersistentMap } from "near-sdk-as";
 
 // import modules 
 import { DoctorModule} from "./modules/doctorModule";
@@ -39,13 +39,35 @@ export class DocCons{
 
 
 
+    keys: PersistentVector<string> = new PersistentVector<string>("keys");
+    doctors: PersistentMap<string, DoctorModule> = new PersistentMap<string,DoctorModule>("doctor"); //key:orgCode, value: org object. Value could be of any type.
+
+ // method add new Doctor account
+  @mutateState()
+    add_doctor(name:string , mail:string , specialty:string , doctorId:string):string{
+      doctorId = doctorId.toUpperCase();
+      let doctor = new DoctorModule(name , mail , specialty , doctorId);
+     
+      this.keys.push(doctorId)
+      this.doctors.set(doctorId , doctor)
+      return "Doctor Created= " + doctorId + " and Name= " + name + "and Specialty" + specialty ;
+    }
 
 
 
+     // method-4 list Doctors by department ID
+    get_doctors():Map<string, DoctorModule>{
+     
+      //maps can't be returned directly. You need to copy the values to a temp normal map and return it 
+      const returnDoctors:Map<string ,DoctorModule> = new Map<string , DoctorModule>();
+
+      for(let i = 0 ; i < this.keys.length ; i++){
+        returnDoctors.set(this.keys[i], this.doctors.getSome(this.keys[i])) ; 
+      }
+      return returnDoctors; 
+    }
 
 
-  
-  // method-4 list Doctors by department ID
 
   // method-5 replay on message by ID (Patient receive message from doctor )
   

@@ -5,13 +5,15 @@
 export class DoctorModule {
   name:string;
   mail:string;
-  specialization:string; 
+  specialty:string; 
+  doctorId:string
   
   
-  constructor(name: string, mail: string, specialization: string) {
+  constructor(name: string, mail: string, specialty: string, doctorId:string) {
     this.name = name;
     this.mail = mail;
-    this.specialization = specialization;
+    this.specialty = specialty;
+    this.doctorId = doctorId ; 
   }
 
 }
