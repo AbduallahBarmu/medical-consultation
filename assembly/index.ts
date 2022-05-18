@@ -8,16 +8,15 @@ import {ConsultationModule} from './modules/consultationModule'
 
 @nearBindgen
 export class DocCons{
+  // method-1 create Doctor account (doctor storage )
+
+
 
   // storage info in blockchaing
   messageLists:PersistentVector<ConsultationModule> = new PersistentVector<ConsultationModule>('w')
- 
-  // method create Doctor account (doctor storage )
-  
 
-
-  // method create consultation message(Patient => doctor by doctor ID )
-  consMessage(message:string , receiver:string):ConsultationModule{
+  // method-2 create consultation message(Patient => doctor by doctor ID )
+  create_consultation_message(message:string , receiver:string):ConsultationModule{
       let sender:string = Context.sender ; 
       let writing:ConsultationModule = new ConsultationModule(message, sender, receiver);
       this.messageLists.push(writing)  // anyone call this method , will take the object and save it in the list 
@@ -27,27 +26,30 @@ export class DocCons{
 
 
 
-
-  // method list messages for the doctor  
-  showMessages(): Array<ConsultationModule> {
-      let mess= new Array<ConsultationModule>(this.messageLists.length);
+  // method-3 list`s messages for the doctor  
+  display_consultation_messages(): Array<ConsultationModule> {
+      let messages = new Array<ConsultationModule>(this.messageLists.length);
       for(let i = 0 ; i < this.messageLists.length ; i++){
-        mess[i]= this.messageLists[i];
-       }
-       
-       return mess ; 
+        messages[i]= this.messageLists[i];
+       }  
+       return messages ; 
     }
 
 
 
 
-  
-  // method list Doctors by department ID
 
 
-  // method replay on message by ID (Patient receive message from doctor )
+
+
+
+
   
-  // method transfer Tokens from patient ⇒ doctor 
+  // method-4 list Doctors by department ID
+
+  // method-5 replay on message by ID (Patient receive message from doctor )
+  
+  // method-6 transfer Tokens from patient ⇒ doctor 
 
 
 
