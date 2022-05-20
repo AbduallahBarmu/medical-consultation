@@ -1,7 +1,8 @@
-@nearBindgen
+
 
 
 //create Doctor account (doctor storage )
+@nearBindgen
 export class DoctorModule {
   name:string;
   mail:string;

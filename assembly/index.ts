@@ -8,17 +8,16 @@ import {ConsultationModule} from './modules/consultationModule'
 
 @nearBindgen
 export class DocCons{
-  // method-1 create Doctor account (doctor storage )
 
 
 
   // storage info in blockchaing
   messageLists:PersistentVector<ConsultationModule> = new PersistentVector<ConsultationModule>('w')
 
-  // method-2 create consultation message(Patient => doctor by doctor ID )
-  create_consultation_message(message:string , receiver:string):ConsultationModule{
+  //create consultation message(Patient => doctor by doctor ID )
+  createConsultation(message:string , doctorId:string ):ConsultationModule{
       let sender:string = Context.sender ; 
-      let writing:ConsultationModule = new ConsultationModule(message, sender, receiver);
+      let writing:ConsultationModule = new ConsultationModule(message , sender , doctorId);
       this.messageLists.push(writing)  // anyone call this method , will take the object and save it in the list 
       
       return writing ; 
@@ -26,8 +25,8 @@ export class DocCons{
 
 
 
-  // method-3 list`s messages for the doctor  
-  display_consultation_messages(): Array<ConsultationModule> {
+  //list`s consultations for the doctor  
+  displayConsultation(): Array<ConsultationModule> {
       let messages = new Array<ConsultationModule>(this.messageLists.length);
       for(let i = 0 ; i < this.messageLists.length ; i++){
         messages[i]= this.messageLists[i];
@@ -36,29 +35,25 @@ export class DocCons{
     }
 
 
-
-
-
+    // doctor methods 
     keys: PersistentVector<string> = new PersistentVector<string>("keys");
     doctors: PersistentMap<string, DoctorModule> = new PersistentMap<string,DoctorModule>("doctor"); //key:orgCode, value: org object. Value could be of any type.
-
- // method add new Doctor account
-  @mutateState()
-    add_doctor(name:string , mail:string , specialty:string , doctorId:string):string{
-      doctorId = doctorId.toUpperCase();
-      let doctor = new DoctorModule(name , mail , specialty , doctorId);
-     
-      this.keys.push(doctorId)
-      this.doctors.set(doctorId , doctor)
-      return "Doctor Created= " + doctorId + " and Name= " + name + "and Specialty" + specialty ;
+    
+    //add new Doctor account
+    @mutateState()
+    addDoctor(name:string , mail:string , specialty:string , doctorId:string):string{
+        doctorId = doctorId.toUpperCase();
+        let doctor = new DoctorModule(name , mail , specialty , doctorId);
+        this.keys.push(doctorId)
+        this.doctors.set(doctorId , doctor)
+        return "Doctor Created= " + doctorId + " and Name= " + name + "and Specialty" + specialty ;
     }
 
 
 
-     // method-4 list Doctors by department ID
-    get_doctors():Map<string, DoctorModule>{
-     
-      //maps can't be returned directly. You need to copy the values to a temp normal map and return it 
+    //list Doctors by specialty
+    getDoctors(specialty:string):Map<string, DoctorModule>{
+      //maps can't be returned directly. we need to copy the values to a temp normal map and return it 
       const returnDoctors:Map<string ,DoctorModule> = new Map<string , DoctorModule>();
 
       for(let i = 0 ; i < this.keys.length ; i++){
@@ -69,8 +64,21 @@ export class DocCons{
 
 
 
-  // method-5 replay on message by ID (Patient receive message from doctor )
+
+
   
+    
+
+  //replay on message by ID (Patient receive message from doctor )
+  consultationIdReply(message:string , patientId:string):ConsultationModule{
+    let reply:string = Context.sender ; 
+    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId)
+    this.messageLists.push(replyMessage)
+
+    return replyMessage
+  }
+
+
   // method-6 transfer Tokens from patient ⇒ doctor 
 
 
