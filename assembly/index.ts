@@ -7,17 +7,15 @@ import {ConsultationModule} from './modules/consultationModule'
 
 
 @nearBindgen
-export class DocCons{
-
-
+export class DoctorConsultation{
 
   // storage info in blockchaing
   messageLists:PersistentVector<ConsultationModule> = new PersistentVector<ConsultationModule>('w')
 
   //create consultation message(Patient => doctor by doctor ID )
-  createConsultation(message:string , doctorId:string ):ConsultationModule{
+  createConsultation(message:string , doctorId:string , patientId:string ):ConsultationModule{
       let sender:string = Context.sender ; 
-      let writing:ConsultationModule = new ConsultationModule(message , sender , doctorId);
+      let writing:ConsultationModule = new ConsultationModule(message , sender , doctorId, patientId);
       this.messageLists.push(writing)  // anyone call this method , will take the object and save it in the list 
       
       return writing ; 
@@ -39,9 +37,9 @@ export class DocCons{
     keys: PersistentVector<string> = new PersistentVector<string>("keys");
     doctors: PersistentMap<string, DoctorModule> = new PersistentMap<string,DoctorModule>("doctor"); //key:orgCode, value: org object. Value could be of any type.
     
-    //add new Doctor account
-    @mutateState()
-    addDoctor(name:string , mail:string , specialty:string , doctorId:string):string{
+  //add new Doctor account
+  @mutateState()
+  addDoctor(name:string , mail:string , specialty:string , doctorId:string):string{
         doctorId = doctorId.toUpperCase();
         let doctor = new DoctorModule(name , mail , specialty , doctorId);
         this.keys.push(doctorId)
@@ -51,8 +49,10 @@ export class DocCons{
 
 
 
-    //list Doctors by specialty
-    getDoctors(specialty:string):Map<string, DoctorModule>{
+
+
+  //list Doctors by specialty
+  getDoctors(specialty:string):Map<string, DoctorModule>{
       //maps can't be returned directly. we need to copy the values to a temp normal map and return it 
       const returnDoctors:Map<string ,DoctorModule> = new Map<string , DoctorModule>();
 
@@ -66,19 +66,18 @@ export class DocCons{
 
 
 
-  
-    
-
   //replay on message by ID (Patient receive message from doctor )
-  consultationIdReply(message:string , patientId:string):ConsultationModule{
+  consultationIdReply(message:string , doctorId:string ,patientId:string ):ConsultationModule{
     let reply:string = Context.sender ; 
-    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId)
+    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId , doctorId)
     this.messageLists.push(replyMessage)
 
     return replyMessage
   }
 
 
+
+  
   // method-6 transfer Tokens from patient ⇒ doctor 
 
 
