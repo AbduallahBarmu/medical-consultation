@@ -15,7 +15,7 @@ export class DoctorConsultation{
   //create consultation message(Patient => doctor by doctor ID )
   createConsultation(message:string , doctorId:string , patientId:string ):ConsultationModule{
       let sender:string = Context.sender ; 
-      let writing:ConsultationModule = new ConsultationModule(message , sender , doctorId, patientId);
+      let writing:ConsultationModule = new ConsultationModule(message, doctorId, patientId);
       this.messageLists.push(writing)  // anyone call this method , will take the object and save it in the list 
       
       return writing ; 
@@ -44,7 +44,7 @@ export class DoctorConsultation{
         let doctor = new DoctorModule(name , mail , specialty , doctorId);
         this.keys.push(doctorId)
         this.doctors.set(doctorId , doctor)
-        return "Doctor Created= " + doctorId + " and Name= " + name + "and Specialty" + specialty ;
+        return "Doctor Created= " + doctorId + " and Name = " + name + " " + " and his Specialty is: " + " " + specialty ;
     }
 
 
@@ -69,7 +69,7 @@ export class DoctorConsultation{
   //replay on message by ID (Patient receive message from doctor )
   consultationIdReply(message:string , doctorId:string ,patientId:string ):ConsultationModule{
     let reply:string = Context.sender ; 
-    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId , doctorId)
+    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId )
     this.messageLists.push(replyMessage)
 
     return replyMessage
@@ -77,7 +77,7 @@ export class DoctorConsultation{
 
 
 
-  
+
   // method-6 transfer Tokens from patient ⇒ doctor 
 
 

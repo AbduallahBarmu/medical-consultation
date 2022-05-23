@@ -7,15 +7,15 @@ export class ConsultationModule {
   message: string;
   doctorId: string;
   patientId: string
-  reply: string; 
+  // reply: string; 
 
 
 
-  constructor(message: string, doctorId: string, patientId: string ,  reply:string) {
+  constructor(message: string, doctorId: string, patientId: string ) {
     this.message = message;
     this.doctorId = doctorId;
     this.patientId = patientId ; 
-    this.reply = reply
+    // this.reply = reply
   }
   
 }
