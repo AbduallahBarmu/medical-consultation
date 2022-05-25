@@ -1,31 +1,41 @@
 import { Context, PersistentVector , PersistentMap } from "near-sdk-as";
 
 // import modules 
-import { DoctorModule} from "./modules/doctorModule";
-import {ConsultationModule} from './modules/consultationModule'
+import { Doctor} from "./models/Doctor"
+import {Consultation , MessageState} from './models/Consultation'
 
 
 
 @nearBindgen
-export class DoctorConsultation{
+export class Contract{
 
   // storage info in blockchaing
-  messageLists:PersistentVector<ConsultationModule> = new PersistentVector<ConsultationModule>('w')
+  messageLists:PersistentVector<Consultation> = new PersistentVector<Consultation>('w')
+  keys: PersistentVector<string> = new PersistentVector<string>("keys");
+  patientKeys: PersistentVector<string> = new PersistentVector<string>("patientKeys");
+  replyLists:PersistentVector<Consultation> = new PersistentVector<Consultation>('w')
+  doctorMessagesLists: PersistentMap<string , Consultation> = new PersistentMap<string, Consultation>('w')
+  doctors: PersistentMap<string, Doctor> = new PersistentMap<string,Doctor>("doctor"); 
+
+
+
+
 
   //create consultation message(Patient => doctor by doctor ID )
-  createConsultation(message:string , doctorId:string , patientId:string ):ConsultationModule{
+  createConsultation(doctorId:string, message:string ):Consultation{
       let sender:string = Context.sender ; 
-      let writing:ConsultationModule = new ConsultationModule(message, doctorId, patientId);
-      this.messageLists.push(writing)  // anyone call this method , will take the object and save it in the list 
+      let consultation:Consultation = new Consultation(doctorId ,message, sender );
+      this.messageLists.push(consultation)  // anyone call this method , will take the object and save it in the list 
       
-      return writing ; 
+      return consultation ; 
   }
 
 
 
+
   //list`s consultations for the doctor  
-  displayConsultation(): Array<ConsultationModule> {
-      let messages = new Array<ConsultationModule>(this.messageLists.length);
+  listConsultations(): Array<Consultation> {
+      let messages = new Array<Consultation>(this.messageLists.length);
       for(let i = 0 ; i < this.messageLists.length ; i++){
         messages[i]= this.messageLists[i];
        }  
@@ -33,31 +43,31 @@ export class DoctorConsultation{
     }
 
 
-    // doctor methods 
-    keys: PersistentVector<string> = new PersistentVector<string>("keys");
-    doctors: PersistentMap<string, DoctorModule> = new PersistentMap<string,DoctorModule>("doctor"); //key:orgCode, value: org object. Value could be of any type.
-    
+
+
   //add new Doctor account
   @mutateState()
-  addDoctor(name:string , mail:string , specialty:string , doctorId:string):string{
+  addNewDoctor(doctorId:string, name:string , info:string , specialty:string ):string{
         doctorId = doctorId.toUpperCase();
-        let doctor = new DoctorModule(name , mail , specialty , doctorId);
+        let doctorInfo = new Doctor(doctorId , name , info , specialty );
         this.keys.push(doctorId)
-        this.doctors.set(doctorId , doctor)
-        return "Doctor Created= " + doctorId + " and Name = " + name + " " + " and his Specialty is: " + " " + specialty ;
+        this.doctors.set(doctorId , doctorInfo)
+        return "Doctor Created: " + doctorId + " Doctor Name : " + name + " " + " Doctor information :" + info + "  " + " Doctor Specialty: " + " " + specialty
     }
 
 
 
 
-
+  @mutateState()
   //list Doctors by specialty
-  getDoctors(specialty:string):Map<string, DoctorModule>{
-      //maps can't be returned directly. we need to copy the values to a temp normal map and return it 
-      const returnDoctors:Map<string ,DoctorModule> = new Map<string , DoctorModule>();
-
-      for(let i = 0 ; i < this.keys.length ; i++){
-        returnDoctors.set(this.keys[i], this.doctors.getSome(this.keys[i])) ; 
+  listDoctors(specialty:string):Map<string, Doctor>{
+    
+      //map can't be returned directly. we need to copy the values to a temp normal map and return it 
+      const returnDoctors:Map<string ,Doctor> = new Map<string , Doctor>();
+      for(let i = 0 ; i < this.keys.length ; i++){  
+        if(specialty == this.doctors.getSome(this.keys[i]).specialty){  // search by specialty
+          returnDoctors.set(this.keys[i], this.doctors.getSome(this.keys[i])); 
+        }
       }
       return returnDoctors; 
     }
@@ -65,20 +75,35 @@ export class DoctorConsultation{
 
 
 
+    @mutateState()
+    //method that docror replay on patient message by his ID (Patient receive message from doctor )
+    doctorReply(doctorId:string , message:string):Consultation{
+        let reply:string = Context.sender ; 
+        let replyMessage:Consultation = new Consultation(doctorId,message,reply )
+        this.replyLists.push(replyMessage)
+        return replyMessage
 
-  //replay on message by ID (Patient receive message from doctor )
-  consultationIdReply(message:string , doctorId:string ,patientId:string ):ConsultationModule{
-    let reply:string = Context.sender ; 
-    let replyMessage:ConsultationModule = new ConsultationModule(message , reply , patientId )
-    this.messageLists.push(replyMessage)
-
-    return replyMessage
-  }
-
-
+    }
 
 
-  // method-6 transfer Tokens from patient ⇒ doctor 
+
+
+    @mutateState()
+    // List doctor`s Consultations
+    ListDoctorConsultations(doctorId:string):Map<string,Consultation>{
+        const doctorMessages:Map<string ,Consultation> = new Map<string,Consultation>();
+        for(let i = 0 ; i < this.patientKeys.length ; i++){
+          if(doctorId == this.doctorMessagesLists.getSome(this.patientKeys[i]).doctorId ) // && this.doctorMessagesLists.status == MessageState.New
+            doctorMessages.set(this.patientKeys[i], this.doctorMessagesLists.getSome(this.patientKeys[i])) ; 
+          }
+          return doctorMessages; 
+    }
+
+
+
+
+
+
 
 
 
